@@ -1,0 +1,14 @@
+{% extends 'admin/admin.html.twig' %}
+
+{% block title %}Edit RDV{% endblock %}
+
+{% block body %}
+    <h1>Edit RDV</h1>
+    
+    {{ form_start(form) }}
+        <div class="d-flex">
+            {{ form_row(form.title) }}
+            {{ form_row(form.slug) }}
+        </div>
+    {{ form_end(form) }}
+{% endblock %}

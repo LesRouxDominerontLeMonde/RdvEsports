@@ -1,0 +1,52 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Mon compte{% endblock %}
+
+{% block body %}
+<h1>Mon compte</h1>
+<p>Bienvenue sur votre page de compte.</p>
+
+<div class="container mt-4">
+    <div class="row row-cols-1 row-cols-md-3 g-4">
+        <div class="col">
+            <div class="card shadow-sm p-3 bg-white rounded">
+                <div class="card-body">
+                    <i class="bi bi-list-task text-secondary" style="font-size: 1.5rem;"></i>
+                    <h5 class="card-title fw-bold mt-2">TITRE</h5>
+                    <p class="card-text text-muted">Sous-titre</p>
+                </div>
+            </div>
+        </div>
+        <div class="col">
+            <div class="card shadow-sm p-3 bg-white rounded">
+                <div class="card-body">
+                    <a href="{{ path('compte.mes_annonces') }}" class="stretched-link text-decoration-none">
+                        <i class="bi bi-calendar-check text-secondary" style="font-size: 1.5rem;"></i>
+                        <h5 class="card-title fw-bold mt-2">RDV</h5>
+                        <p class="card-text text-muted">Gérer mes annonces de rendez-vous</p>
+                    </a>
+                </div>
+            </div>
+        </div>
+        <div class="col">
+            <div class="card shadow-sm p-3 bg-white rounded">
+                <div class="card-body">
+                    <i class="bi bi-person text-secondary" style="font-size: 1.5rem;"></i>
+                    <h5 class="card-title fw-bold mt-2">Profil</h5>
+                    <p class="card-text text-muted">Modifier mon profil</p>
+                </div>
+            </div>
+        </div>
+        <div class="col">
+            <div class="card shadow-sm p-3 bg-white rounded">
+                <div class="card-body">
+                    <i class="bi bi-gear text-secondary" style="font-size: 1.5rem;"></i>
+                    <h5 class="card-title fw-bold mt-2">Paramètres</h5>
+                    <p class="card-text text-muted">Gérer mes paramètres</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

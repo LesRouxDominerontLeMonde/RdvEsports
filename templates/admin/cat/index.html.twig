@@ -1,0 +1,42 @@
+{%extends 'admin/admin.html.twig'%}
+
+{%block title%}Categories{%endblock%}
+
+{%block body%}
+    <h1>Categories</h1>
+    <a href="{{ path('admin.cat.new') }}" class="btn btn-primary btn-sm">New</a>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Id</th>
+                <th>Title</th>
+                <th>RDVS liees</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for cat in categories %}
+                <tr>
+                    <td>{{ cat.id }}</td>
+                    <td>
+                        <a href="{{ path('admin.cat.edit', {id: cat.id}) }}">
+                            {{ cat.title }}
+                        </a>
+                    </td>
+                    <td>
+                        {{ cat.rdvCount }}
+                    </td>
+                    <td>
+                        <div class="d-flex gap-1">
+                            <a href="{{ path('admin.cat.edit', {id: cat.id}) }}" class="btn btn-warning btn-sm">Editer</a>
+                            <form action="{{ path('admin.cat.delete', {id: cat.id}) }}" method="post" style="display: inline-block">
+                                <input type="hidden" name="_method" value="DELETE">
+                                <button type="submit" class="btn btn-danger btn-sm">Supprimer</button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{%endblock%}
