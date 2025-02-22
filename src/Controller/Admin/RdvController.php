@@ -32,8 +32,10 @@ final class RdvController extends AbstractController
     #[Route('/rdvs', name: 'rdv.index')]
     public function index(Request $request, RdvRepository $repository, PaginatorInterface $paginator): Response
     {
+        // Limit a choisoir par PAGE/limit a afficher
+        // Pas encore implementer dans l'url, a faire, mettre limite max 50 peut-etre?
         $page = $request->query->getInt('page', 1);
-        $limit = $request->query->getInt('limit', 6); // Limit a choisoir par PAGE a afficher
+        $limit = $request->query->getInt('limit', 6); 
         $pagination = $this->search($request, $repository, $paginator, $page, $limit);
 
         return $this->render('admin/rdv/index.html.twig', [

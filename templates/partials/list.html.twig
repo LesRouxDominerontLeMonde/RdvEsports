@@ -1,0 +1,55 @@
+{% if pagination.items is empty %}
+    <div class="alert alert-info">Aucun RDV trouvé</div>
+{% else %}
+    <div class="alert alert-info">{{ pagination.items | length }} RDV trouvé(s)</div>
+{% endif %}
+
+<table class="table">
+        <thead>
+            <tr>
+                <th>Id</th>
+                <th>Nom</th>
+                <th>Text</th>
+                <th>Ville</th>
+                <th>Categorie</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for rdv in pagination.items %}
+                <tr>
+                    <td>{{ rdv.id }}</td>
+                    <td>
+                        <a href="{{ path('admin.rdv.edit', {id: rdv.id}) }}">
+                           {{ rdv.title }}
+                        </a>
+                    </td>
+                    <td>{{ rdv.content }}</td>
+                    <td>{{ rdv.place }}</td>
+                    <td>
+                        {% if rdv.category is not empty %}
+                            {% for category in rdv.category %}
+                                {{ category.title }}{% if not loop.last %}, {% endif %}
+                            {% endfor %}
+                        {% else %}
+                            Aucune
+                        {% endif %}
+                    </td>
+                    <td>
+                        <div class="d-flex gap-1">
+                            <a href="{{ path('admin.rdv.edit', {id: rdv.id}) }}" class="btn btn-secondary btn-sm">Editer</a>
+                            <form action="{{ path('admin.rdv.delete', {id: rdv.id }) }}" method="post" style="display: inline-block">
+                                <input type="hidden" name="_method" value="DELETE">
+                                <button type="submit" class="btn btn-danger btn-sm ">Supprimer</button>
+                            </form>
+                        </div> 
+                    </td>
+                </tr>
+
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <div class="pagination">
+        {{ knp_pagination_render(pagination) }}
+    </div>

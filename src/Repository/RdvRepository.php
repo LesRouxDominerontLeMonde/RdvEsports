@@ -35,6 +35,22 @@ class RdvRepository extends ServiceEntityRepository
         return $qb->getQuery();
     }
 
+    /**
+     * @param int $userId
+     * @return Rdv[]
+     */
+
+    public function searchAllFromUser($userId): array
+    {
+        return $this->createQueryBuilder('r')
+            ->leftJoin('r.category', 'c')
+            ->select('r', 'c')
+            ->Where('r.author = :userId')
+            ->setParameter('userId', $userId)
+            ->getQuery()
+            ->getResult();
+    }
+
     //    /**
     //     * @return Rdv[] Returns an array of Rdv objects
     //     */
