@@ -38,7 +38,10 @@ return [
         'version' => '2.4.3',
         'type' => 'css',
     ],
-    'tom-select/dist/css/tom-select.default.css' => [
+    'importmap' => [
+        'version' => '0.0.0',
+    ],
+    'tom-select/dist/css/tom-select.bootstrap5.css' => [
         'version' => '2.4.3',
         'type' => 'css',
     ],

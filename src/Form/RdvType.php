@@ -24,14 +24,11 @@ class RdvType extends AbstractType
             ->add('title', TextType::class, [
                 'empty_data' => '',
             ])
-            ->add('slug', TextType::class, [
-                'required' => false,
-            ])
             ->add('category', EntityType::class, [
                 'class' => Cat::class,
                 'choice_label' => 'title',
                 'multiple' => true,
-                'expanded' => true,
+                'autocomplete' => true,
             ])
             ->add('content', TextType::class, [
                 'empty_data' => '',
