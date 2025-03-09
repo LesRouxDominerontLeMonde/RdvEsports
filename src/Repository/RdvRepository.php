@@ -51,6 +51,53 @@ class RdvRepository extends ServiceEntityRepository
             ->getResult();
     }
 
+    public function findCityAround(float $latitude, float $longitude, int $distance)
+    {
+        // Approximation : 1° de latitude ≈ 111 km
+        $deltaLat = $distance / 111;
+        
+        // La distance en longitude dépend de la latitude (ajustée avec cosinus)
+        $deltaLon = $distance / (111 * cos(deg2rad($latitude)));
+
+        $qb = $this->createQueryBuilder('r')
+            // Filtrage initial avec une "bounding box" (rectangle grossier autour du point)
+            ->where('r.latitude BETWEEN :minLat AND :maxLat')
+            ->andWhere('r.longitude BETWEEN :minLon AND :maxLon')
+            ->setParameter('minLat', $latitude - $deltaLat)
+            ->setParameter('maxLat', $latitude + $deltaLat)
+            ->setParameter('minLon', $longitude - $deltaLon)
+            ->setParameter('maxLon', $longitude + $deltaLon)
+
+            // Calcul précis de la distance avec la formule de la loi des cosinus sphérique
+            ->addSelect(
+                '(6371 * ACOS(
+                    COS(RADIANS(:latitude)) 
+                    * COS(RADIANS(r.latitude)) 
+                    * COS(RADIANS(r.longitude) - RADIANS(:longitude)) 
+                    + SIN(RADIANS(:latitude)) 
+                    * SIN(RADIANS(r.latitude))
+                )) AS distance'
+            )
+
+            // Filtrer uniquement les villes dans le rayon spécifié
+            // Having car WHERE ne peut pas filtrer sur des alias 
+            ->having('distance <= :distance')
+            ->setParameter('latitude', $latitude)
+            ->setParameter('longitude', $longitude)
+            ->setParameter('distance', $distance)
+
+            // Trier les résultats du plus proche au plus éloigné
+            ->orderBy('distance', 'ASC');
+
+        return $qb->getQuery();
+    }
+
+    public function findAllRdv()
+    {
+        return $this->createQueryBuilder('r')
+            ->getQuery();
+    }
+
     //    /**
     //     * @return Rdv[] Returns an array of Rdv objects
     //     */

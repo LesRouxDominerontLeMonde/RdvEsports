@@ -3,14 +3,14 @@
 namespace App\Controller\Admin;
 
 use App\Entity\Rdv;
-use App\Entity\Cat;
 use App\Repository\RdvRepository;
+use App\Repository\VilleRepository;
 use App\Form\RdvType;
 use App\Security\Voter\RdvVoter;
 use Doctrine\ORM\EntityManagerInterface;
-use Doctrine\ORM\Mapping\Id;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Routing\Requirement\Requirement;
@@ -30,13 +30,16 @@ final class RdvController extends AbstractController
     }
 
     #[Route('/rdvs', name: 'rdv.index')]
-    public function index(Request $request, RdvRepository $repository, PaginatorInterface $paginator): Response
+    public function index(Request $request, RdvRepository $repository, PaginatorInterface $paginator, VilleRepository $villeRepository): Response
     {
-        // Limit a choisoir par PAGE/limit a afficher
-        // Pas encore implementer dans l'url, a faire, mettre limite max 50 peut-etre?
         $page = $request->query->getInt('page', 1);
-        $limit = $request->query->getInt('limit', 6); 
-        $pagination = $this->search($request, $repository, $paginator, $page, $limit);
+        $limit = $request->query->getInt('limit', 3); 
+        $place = $request->query->get('place');
+        $distance = $request->query->getInt('distance', 5);
+
+        $pagination = $this->search($request, $repository, $paginator, $page, $limit, $place, $distance, $villeRepository);
+
+        $this->addFlash('info', sprintf('%d RDV trouvé(s)', $pagination->getTotalItemCount()));
 
         return $this->render('admin/rdv/index.html.twig', [
             'pagination' => $pagination,
@@ -92,11 +95,43 @@ final class RdvController extends AbstractController
         return $this->redirectToRoute('admin.rdv.index');
     }
 
-    private function search(Request $request, RdvRepository $repository, PaginatorInterface $paginator, int $page, int $limit)
+    #[Route('/rdv/ville_autocomplete', name: 'rdv.ville_autocomplete', methods: ['GET'])]
+    public function ville_autocomplete(Request $request, VilleRepository $villeRepository): JsonResponse
     {
-        $place = $request->query->get('place');  // Si 'place' n'est pas dans la requête, cela retourne null
+        $villeQuery = $request->query->get('ville');
+        if (!$villeQuery) {
+            return $this->json([]);
+        }
+        $villes = $villeRepository->createQueryBuilder('v')
+            ->where('v.nom LIKE :villeQuery')
+            ->setParameter('villeQuery', $villeQuery.'%')
+            ->setMaxResults(5)
+            ->getQuery()
+            ->getResult();
+        
+        $result = array_map(function($ville) {
+            return [
+                'id' => $ville->getCodeInsee(),
+                'text' => sprintf('%s (%s)', $ville->getNom(), $ville->getCodePostal()),
+            ];
+        }, $villes);
 
-        $query = $repository->findByPlaceQuery($place); // Demande une querry filtre par 'place'
+        return $this->json($result);
+    }
+
+    private function search(Request $request, RdvRepository $repository, PaginatorInterface $paginator, int $page, int $limit, ?string $place, int $distance, VilleRepository $villeRepository)
+    {
+        if ($place) {
+            $ville = $villeRepository->findOneBy(['nom' => $place]);
+            if ($ville) {
+                $query = $repository->findCityAround($ville->getLatitude(), $ville->getLongitude(), $distance);
+            } else {
+                // ??
+                $query = $repository->findByPlaceQuery($place);
+            }
+        } else {
+            $query = $repository->findAllRdv();
+        }
 
         return $paginator->paginate(
             $query,

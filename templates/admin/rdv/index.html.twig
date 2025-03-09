@@ -1,25 +1,72 @@
 {% extends 'admin/admin.html.twig' %}
 
-{% block titlte %}Tout les RDV{% endblock %}
+{% block title %}Tout les RDV{% endblock %}
 
 {% block body %}
     <h1>Tout les RDV</h1>
-    <form action="{{ path('admin.rdv.index') }}" method="get">
-        <label for="place">Recherche par ville :</label>
-        <input type="text" id="place" name="place" placeholder="Entrez une ville" value="{{ app.request.get('place') }}">
-        <button type="submit">Rechercher</button>
+    <form action="{{ path('admin.rdv.index') }}" method="get" class="mb-3">
+        <div class="mb-3">
+            <label for="place" class="form-label">Recherche par ville :</label>
+            <input 
+                type="text" 
+                id="place" 
+                name="place" 
+                class="form-control"
+                placeholder="Entrez une ville" 
+                value="{{ app.request.get('place') }}"
+                data-autocomplete-url="{{ path('admin.rdv.ville_autocomplete') }}"
+                autocomplete="off"
+            >
+            <div id="autocomplete-results" class="list-group position-absolute w-100 mt-1"></div>
+        </div>
+        <div class="mb-3">
+            <label for="distance" class="form-label">Distance :</label>
+            <select id="distance" name="distance" class="form-control">
+                <option value="5">5 km</option>
+                <option value="10">10 km</option>
+                <option value="20">20 km</option>
+                <option value="30">30 km</option>
+            </select>
+        </div>
+        <button type="submit" class="btn btn-primary">Rechercher</button>
     </form>
 
     <p>
         <a href="{{ path('admin.rdv.new') }}" class="btn btn-primary my-3">Créer un nouveau RDV</a>
-
-        {% if pagination.items is empty %}
-            <div class="alert alert-info">Aucun RDV trouvé</div>
-        {% else %}
-            <div class="alert alert-info">{{ pagination.items | length }} RDV trouvé(s)</div>
-        {% endif %}
     </p>
 
     {% include 'partials/list.html.twig' with {'pagination': pagination} %}
 
+    {# script for autocomplete villes feature #}
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const input = document.getElementById('place');
+            const resultsContainer = document.getElementById('autocomplete-results');
+            const url = input.getAttribute('data-autocomplete-url');
+
+            input.addEventListener('input', function() {
+                const query = input.value;
+                if (query.length < 2) {
+                    resultsContainer.innerHTML = '';
+                    return;
+                }
+
+                fetch(`${url}?ville=${query}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        resultsContainer.innerHTML = '';
+                        data.forEach(item => {
+                            const div = document.createElement('div');
+                            div.textContent = item.text;
+                            div.classList.add('list-group-item', 'list-group-item-action');
+                            div.addEventListener('click', function() {
+                                input.value = item.text;
+                                resultsContainer.innerHTML = '';
+                            });
+                            resultsContainer.appendChild(div);
+                        });
+                    });
+            });
+        });
+    </script>
 {% endblock %}

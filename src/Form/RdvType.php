@@ -13,6 +13,7 @@ use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
+use Symfony\Component\Form\Extension\Core\Type\HiddenType;
 use Symfony\Component\Form\FormEvents;
 use Symfony\Component\String\Slugger\AsciiSlugger;
 
@@ -38,6 +39,9 @@ class RdvType extends AbstractType
             ])
             ->add('date', null, [
                 'widget' => 'single_text',
+            ])
+            ->add('slug', HiddenType::class, [
+                'empty_data' => '',
             ])
             ->add('save', SubmitType::class, [
                 'label' => 'Enregistrer'
